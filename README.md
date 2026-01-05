@@ -1,209 +1,162 @@
-# Fullstack Take-Home Assessment
+# Frontend Application
 
-Welcome! This assessment is designed to evaluate your skills in FastAPI backend development and React frontend integration.
+React + TypeScript + TailwindCSS application for candidate management.
 
-## Time Expectation
+## Setup
 
-**1 hour and 30 minutes**. We understand this is limited time, so focus on:
-1. **Backend implementation** (70% of assessment)
-2. Frontend wiring (30% of assessment)
-3. Correct functionality over additional features
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## Overview
+2. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-You'll be implementing the backend API for a candidate management interface and wiring it to a pre-built frontend. This assessment focuses on:
-- Building robust FastAPI endpoints with multi-field filtering
-- Implementing flexible sorting and pagination
-- Proper API response formatting
-- Connecting frontend to backend with React
+The app will be available at `http://localhost:5173`
 
-## What's Different About This Assessment
+## Project Structure
 
-Unlike a frontend-focused assessment, **most of the UI components are already built for you**. Your job is to:
-1. Implement the backend logic (filtering, sorting, pagination)
-2. Build filter section components
-3. Wire the frontend to your backend API
-
-## What's Pre-Built for You
-
-### Frontend Components (Already Implemented)
-- Complete: **SearchInput** - Debounced search input with icon
-- Complete: **CollapsibleSection** - Working expand/collapse sections
-- Complete: **CandidateCard** - Complete candidate display with all details
-- Complete: **Pagination** - Pagination UI component
-- Complete: **Sidebar** - Full sidebar layout with search and filters
-- Complete: **App.tsx** - Main app structure with state management
-
-### What You Need to Build
-
-#### Backend (~60 minutes) - THE MAIN FOCUS
-In `backend/main.py`, implement:
-
-1. **Multi-field Filtering**
-   - Search filter (name, position, company)
-   - Application type filter (active/archived)
-   - Source filter (LinkedIn, Indeed, etc.)
-   - Job ID filter
-
-2. **Flexible Sorting**
-   - Sort by last_activity (date)
-   - Sort by name (alphabetical)
-   - Support both ascending and descending order
-
-3. **Server-side Pagination**
-   - Calculate correct page slices
-   - Return proper metadata (total, total_pages)
-   - Handle edge cases
-
-4. **Response Formatting**
-   - Return consistent response structure
-   - Include all required metadata
-
-#### Frontend (~30 minutes) - MINOR WORK
-1. **Wire API calls** in App.tsx
-   - Fetch candidates from your backend
-   - Handle loading states
-   - Update state on search/pagination
-
-2. **Build Filter Sections**
-   - Add checkbox options inside CollapsibleSection components
-   - Wire filter selections to backend API calls
-
-3. **Make Pagination Work**
-   - Connect pagination clicks to page state
-   - Trigger new API calls on page change
-
-## Getting Started
-
-### 1. Backend Setup
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload
+```
+src/
+├── components/          # React components
+│   ├── Sidebar.tsx     # Sidebar with filters
+│   ├── CandidateCard.tsx  # Individual candidate card
+│   ├── Pagination.tsx  # Pagination component
+│   └── ...             # Add your components here
+├── types/              # TypeScript type definitions
+│   └── candidate.ts    # Candidate and API response types
+├── App.tsx             # Main app component
+├── App.css             # Custom CSS (use sparingly)
+├── index.css           # Tailwind imports
+└── main.tsx            # App entry point
 ```
 
-The API will run on `http://localhost:8000`
+## Available Scripts
 
-### 2. Frontend Setup
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-```bash
-cd frontend
-npm install
-npm run dev
+## Implementation Guide
+
+### 1. Component Structure
+
+We recommend creating these components:
+
+**Sidebar Components:**
+- `SearchInput.tsx` - Search input with icon
+- `SortDropdown.tsx` - Dropdown for sorting
+- `CollapsibleSection.tsx` - Reusable collapsible filter section
+- `Sidebar.tsx` - Main sidebar container
+
+**Main Content Components:**
+- `CandidateCard.tsx` - Individual candidate display
+- `CandidateList.tsx` - List container
+- `Pagination.tsx` - Pagination controls
+- `FilterTags.tsx` - Active filter badges (optional)
+
+### 2. State Management
+
+You can use React hooks for state:
+- `useState` for local component state
+- `useEffect` for API calls
+- Consider creating a custom hook for API calls
+
+Example:
+```typescript
+const [candidates, setCandidates] = useState<Candidate[]>([]);
+const [loading, setLoading] = useState(false);
+const [page, setPage] = useState(1);
+const [search, setSearch] = useState('');
 ```
 
-The app will run on `http://localhost:5173`
+### 3. API Integration
 
-## Core Requirements (Must Complete)
+The backend API is available at `http://localhost:8000/api/candidates`
 
-### 1. Backend Implementation (~60 minutes) - **PRIMARY FOCUS (70%)**
+Example fetch:
+```typescript
+const fetchCandidates = async (page: number, search: string) => {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    per_page: '5',
+    ...(search && { search }),
+  });
 
-Implement in `backend/main.py`:
+  const response = await fetch(`http://localhost:8000/api/candidates?${params}`);
+  const data = await response.json();
+  return data;
+};
+```
 
-**Filtering** (20 min):
-- [ ] Search by name, position, or company (case-insensitive)
-- [ ] Filter by application_type (list parameter)
-- [ ] Filter by source (list parameter)
-- [ ] Filter by job_id (exact match)
+### 4. Styling with Tailwind
 
-**Sorting** (15 min):
-- [ ] Sort by last_activity (date field)
-- [ ] Sort by name (alphabetical)
-- [ ] Support asc/desc order for both
+Common patterns you'll use:
 
-**Pagination** (15 min):
-- [ ] Calculate correct slice based on page and per_page
-- [ ] Return accurate total count
-- [ ] Calculate total_pages correctly
-- [ ] Handle out-of-bounds pages gracefully
+**Layout:**
+```jsx
+<div className="flex">
+  <aside className="w-[200px] border-r"></aside>
+  <main className="flex-1"></main>
+</div>
+```
 
-**Response Format** (10 min):
-- [ ] Return JSON with: candidates, total, page, per_page, total_pages
-- [ ] Ensure consistent response structure
+**Buttons:**
+```jsx
+<button className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover">
+  Click me
+</button>
+```
 
-### 2. Frontend Integration (~30 minutes)
+**Inputs:**
+```jsx
+<input
+  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary"
+  type="text"
+  placeholder="Search..."
+/>
+```
 
-**Wire API Calls** (15 min):
-- [ ] Implement useEffect to fetch candidates
-- [ ] Pass search, page params to API
-- [ ] Update state with response data
+### 5. TypeScript Types
 
-**Filter Sections** (10 min):
-- [ ] Add checkboxes to 2-3 filter sections
-- [ ] Store selected filters in state
-- [ ] Pass filters to API calls
+Type definitions are in `src/types/candidate.ts`:
+- `Candidate` - Individual candidate
+- `Interview` - Interview stage
+- `CandidatesResponse` - API response
+- `FilterState` - Filter state
 
-**Pagination** (5 min):
-- [ ] Verify pagination component is wired to API calls
+Use these types for props and state:
+```typescript
+interface CandidateCardProps {
+  candidate: Candidate;
+}
 
-## Design Files
+const CandidateCard: React.FC<CandidateCardProps> = ({ candidate }) => {
+  // ...
+};
+```
 
-- **Reference Design (Figma)**: [View Figma File](https://www.figma.com/design/gZL1X2fSo0MzExOIXNW1hz/Sample-Pages?node-id=1-1390&t=00CymjmcEhM0QfRK-11)
-- **Design Specs**: See `designs/specs.md` for colors, spacing, typography
-- **Screenshots**: See `designs/` folder for exported screenshots
+## Tips
 
-## Evaluation Criteria
+1. **Start with the structure** - Build the layout first (sidebar + main content)
+2. **Component by component** - Build one component at a time, test it, then move on
+3. **Static first** - Display static data before adding interactivity
+4. **Then add state** - Add filtering, sorting, pagination
+5. **Polish last** - Add hover states, animations, loading states at the end
 
-Your submission will be evaluated on:
+## Troubleshooting
 
-### 1. Backend Implementation (50 points)
-- All filters work correctly (multi-field filtering)
-- Sorting works for both fields and directions
-- Pagination returns correct data slices
-- Response format is consistent and correct
-- Edge cases handled (empty results, out-of-bounds pages)
-- Bonus: Successfully handling list parameters for filtering (+5 pts)
+**Tailwind classes not working?**
+- Make sure `index.css` has the `@tailwind` directives
+- Check that `tailwind.config.js` includes your file paths
 
-### 2. API Integration (25 points)
-- Frontend successfully calls backend
-- Search updates candidate list
-- Pagination works
-- Loading/error states handled
+**CORS errors?**
+- Make sure the backend is running on port 8000
+- Check that CORS is configured correctly in `backend/main.py`
 
-### 3. Code Quality (15 points)
-- Clean, readable code
-- Proper TypeScript types
-- Good variable naming
-- Helpful comments where needed
-
-### 4. Filter Implementation (10 points)
-- Filter sections have working checkboxes
-- Filters update the API call
-- Multiple filters can be combined
-
-## Submission
-
-When complete:
-
-1. **Test your code**
-   - Ensure backend runs without errors
-   - Test all filtering, sorting, pagination
-   - Verify frontend connects to backend
-
-2. **Document any incomplete features** in `NOTES.md`
-   - What you completed
-   - What you would do with more time
-   - Any challenges you faced
-
-3. **Zip the project**
-   - Delete `node_modules/` and `venv/` before zipping
-   - Keep `.git` folder if you used git
-
-4. **Email it back to us**
-
-## Tips for Success
-
-1. **Start with the backend** - This is 70% of the assessment
-2. **Test as you go** - Use `http://localhost:8000/docs` to test endpoints
-3. **Use the hints** - The backend file has detailed pseudocode
-4. **Get it working first** - Perfect is the enemy of good
-5. **Frontend is mostly done** - Just wire it up, don't rebuild components
-
-## Questions?
-
-If you have questions during the assessment, please reach out to [your-email@company.com].
-
-Good luck! We're excited to see your backend skills.
+**TypeScript errors?**
+- Make sure you're using the types from `src/types/candidate.ts`
+- Avoid using `any` type
